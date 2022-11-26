@@ -1,0 +1,38 @@
+[gd_scene load_steps=7 format=2]
+
+[ext_resource path="res://Scripts/GameSettings.cs" type="Script" id=2]
+[ext_resource path="res://Scripts/MainCamera.cs" type="Script" id=3]
+[ext_resource path="res://Scripts/GameManager.cs" type="Script" id=4]
+
+[sub_resource type="PhysicsMaterial" id=3]
+rough = true
+
+[sub_resource type="PlaneMesh" id=4]
+
+[sub_resource type="ConvexPolygonShape" id=5]
+points = PoolVector3Array( -1.00542, 0.00546448, -1.00546, 1.00546, 0.00546448, 1.00546, -1.00542, 0.00546448, 1.00546, 1.00546, 0.00546448, -1.00546 )
+
+[node name="World" type="Spatial"]
+
+[node name="GameSettings" type="Node" parent="."]
+script = ExtResource( 2 )
+
+[node name="GameManager" type="Node" parent="."]
+script = ExtResource( 4 )
+
+[node name="DirectionalLight" type="DirectionalLight" parent="."]
+transform = Transform( 1, 0, 0, 0, 1.19249e-08, 1, 0, -1, 1.19249e-08, 0, 10, 0 )
+
+[node name="MainCamera" type="Camera" parent="."]
+transform = Transform( 1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 5, 8 )
+script = ExtResource( 3 )
+
+[node name="Ground" type="StaticBody" parent="."]
+transform = Transform( 5, 0, 0, 0, 1, 0, 0, 0, 10, 0, 0, 0 )
+physics_material_override = SubResource( 3 )
+
+[node name="MeshInstance" type="MeshInstance" parent="Ground"]
+mesh = SubResource( 4 )
+
+[node name="CollisionShape" type="CollisionShape" parent="Ground"]
+shape = SubResource( 5 )
