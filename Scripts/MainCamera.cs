@@ -85,7 +85,23 @@ public class MainCamera : Camera
 	// Handle the input events.
 	public override void _Input(InputEvent @event)
 	{
-		if (@event is InputEventMouseButton eventMouseButton)
+		if (@event.IsActionPressed("move_forward") && !moving)
+		{
+			GlobalTranslation += -GlobalTransform.basis.z;
+		}
+		else if (@event.IsActionPressed("move_backward") && !moving)
+		{
+			GlobalTranslation += GlobalTransform.basis.z;
+		}
+		else if (@event.IsActionPressed("move_left") && !moving)
+		{
+			GlobalTranslation += -GlobalTransform.basis.x;
+		}
+		else if (@event.IsActionPressed("move_right") && !moving)
+		{
+			GlobalTranslation += GlobalTransform.basis.x;			
+		}
+		else if (@event is InputEventMouseButton eventMouseButton)
 		{
 			if (eventMouseButton.Doubleclick && eventMouseButton.ButtonIndex == 1 && !moving)
 				giveImpulseToPlayer(eventMouseButton.Position);
@@ -100,7 +116,7 @@ public class MainCamera : Camera
 				var xDelta = delta.x;
 				var yDelta = delta.y;
 				GlobalRotate(Vector3.Up, xDelta * RotationSpeed);
-				GlobalRotate(Vector3.Right, yDelta * RotationSpeed);
+				GlobalRotate(GlobalTransform.basis.x, yDelta * RotationSpeed);
 			}
 		}
 	}
