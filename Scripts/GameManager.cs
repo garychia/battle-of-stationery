@@ -13,7 +13,13 @@ public class GameManager : Node
 	// Players in the game.
 	private Array players;
 	
-	private MainCamera mainCamera;
+	private MainCamera mainCamera = null;
+	
+	private void focusCurrentPlayer()
+	{
+		var currentPlayer = (Player)players[currentPlayerIndex];
+		mainCamera.FocusPlayer(currentPlayer.GlobalTranslation);
+	}
 	
 	// Reset the game to the intial state.
 	private void ResetGame()
@@ -26,7 +32,7 @@ public class GameManager : Node
 		foreach (Vector3 position in setup.PlayerPositions)
 		{
 			var player = playerScene.Instance() as Player;
-			player.Translation = position;
+			player.GlobalTranslation = position;
 			players.Add(player);
 			AddChild(player);
 		}
@@ -38,6 +44,7 @@ public class GameManager : Node
 		ResetGame();
 		mainCamera = GetNode<MainCamera>("/root/World/MainCamera");
 		mainCamera.Connect("PlayerClicked", this, nameof(OnPlayerClicked));
+		focusCurrentPlayer();
 	}
 	
 	private void OnPlayerClicked(Player player, Vector3 forcePosition, Vector3 forceDirection)
@@ -46,6 +53,7 @@ public class GameManager : Node
 		{
 			player.ReceiveImpulse(forcePosition, forceDirection);
 			currentPlayerIndex = (currentPlayerIndex + 1) % players.Count;
+			focusCurrentPlayer();
 		}
 	}
 }
