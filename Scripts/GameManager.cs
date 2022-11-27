@@ -8,10 +8,12 @@ public class GameManager : Node
 	private BattleSetup setup = new DefaultBattle();
 	
 	// Current player.
-	private uint currentPlayerIndex = 0;
+	private int currentPlayerIndex = 0;
 	
 	// Players in the game.
 	private Array players;
+	
+	private MainCamera mainCamera;
 	
 	// Reset the game to the intial state.
 	private void ResetGame()
@@ -34,5 +36,16 @@ public class GameManager : Node
 	public override void _Ready()
 	{
 		ResetGame();
+		mainCamera = GetNode<MainCamera>("/root/World/MainCamera");
+		mainCamera.Connect("PlayerClicked", this, nameof(OnPlayerClicked));
+	}
+	
+	private void OnPlayerClicked(Player player, Vector3 forcePosition, Vector3 forceDirection)
+	{
+		if (player == players[currentPlayerIndex] as Player)
+		{
+			player.ReceiveImpulse(forcePosition, forceDirection);
+			currentPlayerIndex = (currentPlayerIndex + 1) % players.Count;
+		}
 	}
 }

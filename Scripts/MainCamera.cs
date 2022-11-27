@@ -4,6 +4,9 @@ using Godot.Collections;
 // Displays the battle field and players in the game.
 public class MainCamera : Camera
 {
+	[Signal]
+	public delegate void PlayerClicked(Player player, Vector3 forcePosition, Vector3 forceDirection);
+	
 	// Length of ray used to detect a player.
 	private const float RayLength = 1000;
 
@@ -21,14 +24,15 @@ public class MainCamera : Camera
 			// Check the result of the ray cast.
 			if (result.Contains("collider"))
 			{
-				var playerBody = result["collider"] as RigidBody;
+				var player = result["collider"] as Player;
 				var forceDir = rayEnd - mousePos;
 				forceDir.y = 0;
 				forceDir = forceDir.Normalized();
 				var forcePos = (Vector3)result["position"];
-				if (playerBody != null)
+				if (player != null)
 				{
-					playerBody.ApplyImpulse(forcePos - playerBody.GlobalTransform.origin, forceDir * GameSettings.Force);
+					EmitSignal(nameof(PlayerClicked), player, forcePos, forceDir);
+					//playerBody.ApplyImpulse(forcePos - playerBody.GlobalTransform.origin, forceDir * GameSettings.Force);
 				}
 			}
 		}
