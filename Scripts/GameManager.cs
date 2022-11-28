@@ -41,6 +41,10 @@ public class GameManager : Node
 		mainCamera = GetNode<MainCamera>("/root/World/MainCamera");
 		mainCamera.Connect("PlayerClicked", this, nameof(OnPlayerClicked));
 		mainCamera.Connect("FollowingFinished", this, nameof(OnCameraFollowingFinished));
+		
+		var detector = GetNode<FallingPlayerDetector>("/root/World/FallingPlayerDetector");
+		detector.Connect("body_entered", this, nameof(OnFallingPlayerDetectorDetected));
+		
 		focusCurrentPlayer();
 		roundReady = true;
 	}
@@ -66,5 +70,15 @@ public class GameManager : Node
 	{
 		focusCurrentPlayer();
 		roundReady = true;
+	}
+	
+	private void OnFallingPlayerDetectorDetected(Node node)
+	{
+		var player = node as Player;
+		if (!(player is null))
+		{
+			GD.Print("The player has lost:");
+			GD.Print(player);
+		}
 	}
 }
