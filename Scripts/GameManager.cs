@@ -14,6 +14,8 @@ public class GameManager : Node
 	private Array players;
 
 	private MainCamera mainCamera = null;
+	
+	private bool roundReady = false;
 
 	private void focusCurrentPlayer()
 	{
@@ -36,30 +38,33 @@ public class GameManager : Node
 			players.Add(player);
 			AddChild(player);
 		}
+		mainCamera = GetNode<MainCamera>("/root/World/MainCamera");
+		mainCamera.Connect("PlayerClicked", this, nameof(OnPlayerClicked));
+		mainCamera.Connect("FollowingFinished", this, nameof(OnCameraFollowingFinished));
+		focusCurrentPlayer();
+		roundReady = true;
 	}
 
 	// Initialize the game.
 	public override void _Ready()
 	{
 		ResetGame();
-		mainCamera = GetNode<MainCamera>("/root/World/MainCamera");
-		mainCamera.Connect("PlayerClicked", this, nameof(OnPlayerClicked));
-		mainCamera.Connect("FollowingFinished", this, nameof(OnCameraFollowingFinished));
-		focusCurrentPlayer();
 	}
 
 	private void OnPlayerClicked(Player player, Vector3 forcePosition, Vector3 forceDirection)
 	{
-		if (player == players[currentPlayerIndex] as Player)
+		if (player == players[currentPlayerIndex] as Player && roundReady)
 		{
 			player.ReceiveImpulse(forcePosition, forceDirection);
 			mainCamera.FollowPlayer(player);
 			currentPlayerIndex = (currentPlayerIndex + 1) % players.Count;
+			roundReady = false;
 		}
 	}
 
 	private void OnCameraFollowingFinished()
 	{
 		focusCurrentPlayer();
+		roundReady = true;
 	}
 }

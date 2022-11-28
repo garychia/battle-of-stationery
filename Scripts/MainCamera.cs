@@ -42,7 +42,7 @@ public class MainCamera : Camera
 	private void move()
 	{
 		var currentDistanceToDestination = Mathf.Abs(GlobalTransform.origin.DistanceTo(destination));
-		if (currentDistanceToDestination < 0.05)
+		if (currentDistanceToDestination < 0.05 || currentDistanceToDestination > 15)
 		{
 			GlobalTranslation = destination;
 			moving = false;
