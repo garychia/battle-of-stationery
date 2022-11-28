@@ -6,27 +6,39 @@ public class MainCamera : Camera
 {
 	[Signal]
 	public delegate void PlayerClicked(Player player, Vector3 forcePosition, Vector3 forceDirection);
-	
+
+	[Signal]
+	public delegate void FollowingFinished();
+
 	// Length of ray used to detect a player.
 	private const float RayLength = 1000;
-	
+
 	// whether the MainCamera is moving.
 	private bool moving = false;
-	
+
 	private Vector3 destination;
-	
+
 	private Vector3 focusPoint;
-	
+
 	private float distanceToDestination = 0f;
-	
+
+	private bool mouseLButtonPressed = false;
+
+	private bool following = false;
+
+	private Player playerFollowed = null;
+
+	private Vector3 playerToCamera;
+
 	[Export]
-	public float MovingSpeed = 0.1f;
-	
+	public float MovingSpeed = 0.2f;
+
 	[Export]
 	public float RotationSpeed = 0.003f;
-	
-	private bool mouseLButtonPressed = false;
-	
+
+	[Export]
+	public float FollowingPlayerDuration = 5f;
+
 	private void move()
 	{
 		var currentDistanceToDestination = Mathf.Abs(GlobalTransform.origin.DistanceTo(destination));
@@ -43,7 +55,24 @@ public class MainCamera : Camera
 		}
 		LookAtFromPosition(GlobalTranslation, focusPoint, Vector3.Up);
 	}
-	
+
+	void follow()
+	{
+		if (playerFollowed is null)
+		{
+			following = false;
+			return;
+		}
+		GlobalTranslation = playerFollowed.GlobalTranslation + playerToCamera;
+		LookAtFromPosition(GlobalTranslation, playerFollowed.GlobalTranslation, Vector3.Up);
+	}
+
+	void OnFollowingTimeout()
+	{
+		following = false;
+		EmitSignal(nameof(FollowingFinished));
+	}
+
 	private void giveImpulseToPlayer(Vector2 mousePosition)
 	{
 		// Calculate the ray vector.
@@ -66,7 +95,7 @@ public class MainCamera : Camera
 			}
 		}
 	}
-	
+
 	public void FocusPlayer(Vector3 playerPosition)
 	{
 		var originToPlayer = playerPosition.Normalized();
@@ -75,31 +104,43 @@ public class MainCamera : Camera
 		focusPoint = playerPosition;
 		moving = true;
 	}
-	
+
+	public void FollowPlayer(Player player)
+	{
+		playerToCamera = GlobalTranslation - player.GlobalTranslation;
+		playerFollowed = player;
+		following = true;
+		var timer = GetTree().CreateTimer(FollowingPlayerDuration);
+		timer.Connect("timeout", this, nameof(OnFollowingTimeout));
+	}
+
 	public override void _Process(float delta)
 	{
 		if (moving)
 			move();
+		else if (following)
+			follow();
 	}
 
 	// Handle the input events.
 	public override void _Input(InputEvent @event)
 	{
-		if (@event.IsActionPressed("move_forward") && !moving)
+		var movable = !moving && !following;
+		if (@event.IsActionPressed("move_forward") && movable)
 		{
 			GlobalTranslation += -GlobalTransform.basis.z;
 		}
-		else if (@event.IsActionPressed("move_backward") && !moving)
+		else if (@event.IsActionPressed("move_backward") && movable)
 		{
 			GlobalTranslation += GlobalTransform.basis.z;
 		}
-		else if (@event.IsActionPressed("move_left") && !moving)
+		else if (@event.IsActionPressed("move_left") && movable)
 		{
 			GlobalTranslation += -GlobalTransform.basis.x;
 		}
-		else if (@event.IsActionPressed("move_right") && !moving)
+		else if (@event.IsActionPressed("move_right") && movable)
 		{
-			GlobalTranslation += GlobalTransform.basis.x;			
+			GlobalTranslation += GlobalTransform.basis.x;
 		}
 		else if (@event is InputEventMouseButton eventMouseButton)
 		{
