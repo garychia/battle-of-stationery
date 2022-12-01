@@ -16,6 +16,8 @@ public class GameManager : Node
 	private MainCamera mainCamera = null;
 	
 	private bool roundReady = false;
+	
+	private GameUI ui = null;
 
 	private void focusCurrentPlayer()
 	{
@@ -47,11 +49,25 @@ public class GameManager : Node
 		
 		focusCurrentPlayer();
 		roundReady = true;
+		
+		UpdateGameUI();
+	}
+	
+	private void UpdateGameUI()
+	{
+		var playerLabel = ui.GetPlayerLabel();
+		playerLabel.Text = "Player " + (currentPlayerIndex + 1).ToString();
 	}
 
 	// Initialize the game.
 	public override void _Ready()
 	{
+		base._Ready();
+		var uiScene = GD.Load<PackedScene>("res://Scenes/GameUI.tscn");
+		ui = uiScene.Instance() as GameUI;
+		var backButton = ui.GetBackButton();
+		backButton.Connect("button_up", this, nameof(OnBackButtonUp));
+		AddChild(ui);
 		ResetGame();
 	}
 
@@ -70,6 +86,7 @@ public class GameManager : Node
 	{
 		focusCurrentPlayer();
 		roundReady = true;
+		UpdateGameUI();
 	}
 	
 	private void OnFallingPlayerDetectorDetected(Node node)
@@ -80,5 +97,10 @@ public class GameManager : Node
 			GD.Print("The player has lost:");
 			GD.Print(player);
 		}
+	}
+	
+	private void OnBackButtonUp()
+	{
+		GetTree().ChangeScene("res://Scenes/MainMenu.tscn");
 	}
 }
