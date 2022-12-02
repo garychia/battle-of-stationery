@@ -36,6 +36,7 @@ public class GameManager : Node
 		foreach (Vector3 position in setup.PlayerPositions)
 		{
 			var player = playerScene.Instance() as Player;
+			player.SetID(players.Count);
 			player.GlobalTranslation = position;
 			players.Add(player);
 			AddChild(player);
@@ -56,7 +57,8 @@ public class GameManager : Node
 	private void UpdateGameUI()
 	{
 		var playerLabel = ui.GetPlayerLabel();
-		playerLabel.Text = "Player " + (currentPlayerIndex + 1).ToString();
+		var currentPlayer = (Player)players[currentPlayerIndex];
+		playerLabel.Text = "Player " + (currentPlayer.GetID() + 1);
 	}
 
 	// Initialize the game.
@@ -94,13 +96,19 @@ public class GameManager : Node
 		var player = node as Player;
 		if (!(player is null))
 		{
-			GD.Print("The player has lost:");
-			GD.Print(player);
+			players.Remove(player);
+			if (players.Count == 1) {
+				var winMsgLabel = ui.GetWinMessageLabel();
+				winMsgLabel.Visible = true;
+				winMsgLabel.Text = "Player " + (((Player)players[0]).GetID() + 1) + " Won!";
+				GetTree().Paused = true;
+			}
 		}
 	}
 	
 	private void OnBackButtonUp()
 	{
 		GetTree().ChangeScene("res://Scenes/MainMenu.tscn");
+		GetTree().Paused = false;
 	}
 }
