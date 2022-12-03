@@ -1,5 +1,4 @@
 using Godot;
-using System;
 
 // Represents the setting values of game.
 public class GameSettings : Node
