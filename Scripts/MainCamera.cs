@@ -165,6 +165,19 @@ public class MainCamera : Camera
                 giveImpulseToPlayer(eventMouseButton.Position);
             else
                 mouseLButtonPressed = eventMouseButton.Pressed && eventMouseButton.ButtonIndex == 1;
+
+            InputEventMouseButton mouseButton = (InputEventMouseButton)@event;
+            if (mouseButton.IsPressed())
+            {
+                if (mouseButton.ButtonIndex == (int)ButtonList.WheelUp)
+                {
+                    GlobalTranslation += -GlobalTransform.basis.z;
+                }
+                else if (mouseButton.ButtonIndex == (int)ButtonList.WheelDown)
+                {
+                    GlobalTranslation += GlobalTransform.basis.z;
+                }
+            }
         }
         else if (@event is InputEventMouseMotion eventMouseMotion)
         {
